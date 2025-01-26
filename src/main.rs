@@ -24,6 +24,7 @@ enum Token{
     Number(Number),
     Operator(Operator),
 }
+/// Converts your mathematical expression into tokens
 fn lex(input: &str) -> Vec<Token>
 {
     let mut tokens = Vec::new();
@@ -94,9 +95,10 @@ fn lex(input: &str) -> Vec<Token>
 }
 
 
-fn main() {
 
-    let to_lex = "5+23/455.0 *(73*45)";
+
+fn main() {
+    let to_lex = "4*2+1-2*2+10*57-100";
     println!("{:?}",lex(to_lex));
     println!("{:?}",Parser::new(
         lex(to_lex).into_iter()
