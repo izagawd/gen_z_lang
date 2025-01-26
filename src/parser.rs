@@ -4,6 +4,7 @@ use crate::operator::Operator;
 use crate::operator::Operator::{Divide, Multiply};
 use crate::Token;
 
+/// Used to convert a collection of tokens into an Expression enum, which can also be seen as a syntax tree
 pub struct Parser<Iter : Iterator<Item=Token>>{
     peekable: Peekable<Iter>
 }
