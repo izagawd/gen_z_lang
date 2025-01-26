@@ -1,6 +1,17 @@
+use std::fmt::{Debug, Display, Formatter};
+use std::io::stderr;
 use std::ops::{Add, Div, Mul, Sub};
 
-
+#[derive(Clone, Copy, PartialEq)]
+pub enum Number{
+    Int(i32),
+    Float(f32),
+}
+impl Display for Number {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(self, f)
+    }
+}
 impl Add for Number{
     type Output = Number;
     fn add(self, other: Number) -> Number{
@@ -13,6 +24,14 @@ impl Add for Number{
     }
 }
 
+impl Debug for Number{
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Number::Int(i) => write!(f, "{:?}", i),
+            Number::Float(a) => write!(f, "{:?}", a),
+        }
+    }
+}
 impl Sub for Number {
     type Output = Number;
 
@@ -38,11 +57,7 @@ impl Mul for Number {
         }
     }
 }
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Number{
-    Int(i32),
-    Float(f32),
-}
+
 impl Div for Number {
     type Output = Number;
 

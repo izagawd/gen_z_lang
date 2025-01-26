@@ -8,6 +8,7 @@ mod parser;
 extern crate core;
 
 use std::cmp::PartialEq;
+use std::io;
 use std::iter::Peekable;
 use std::ops::{Add, Div, Mul, Sub};
 use crate::expression::Expression;
@@ -98,9 +99,10 @@ fn lex(input: &str) -> Vec<Token>
 
 
 fn main() {
-    let to_lex = "4*2+1-2*2+10*57-100";
-    println!("{:?}",lex(to_lex));
-    println!("{:?}",Parser::new(
-        lex(to_lex).into_iter()
-    ).compile().eval())
+    println!("Input your mathematical expression:");
+    let  input_accepter  = io::stdin().lines().next().unwrap().unwrap();
+    let tokens = lex(input_accepter.as_str());
+    let expression = Parser::new(tokens.into_iter()).compile();
+    let result = expression.eval();
+    println!("Result: {result}",)
 }
