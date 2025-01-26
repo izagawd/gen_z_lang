@@ -1,22 +1,19 @@
 #![feature(let_chains)]
 
+extern crate core;
 mod number;
 mod operator;
 mod expression;
 mod parser;
 
-extern crate core;
-
-use std::cmp::PartialEq;
-use std::io;
-use std::iter::Peekable;
-use std::ops::{Add, Div, Mul, Sub};
-use crate::expression::Expression;
 use crate::number::Number;
 use crate::number::Number::{Float, Int};
 use crate::operator::Operator;
 use crate::operator::Operator::*;
 use crate::parser::Parser;
+use std::cmp::PartialEq;
+use std::io;
+use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Debug, Clone,Copy)]
 enum Token{
