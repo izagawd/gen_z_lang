@@ -120,7 +120,7 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
             Some(Token::VariableName(name)) => {
                 Expression::Variable(name)
             }
-            other => panic!("Expected int or bracket, got {:?}", other)
+            other => panic!("Expected number or left bracket, got {:?}", other)
 
         }
     }
