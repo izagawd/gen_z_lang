@@ -12,8 +12,9 @@ use crate::operator::Operator;
 use crate::operator::Operator::*;
 use crate::parser::{Parser, ProgramData, SyntaxTree};
 use std::cmp::PartialEq;
-use std::io;
+use std::{io, thread};
 use std::ops::{Add, Div, Mul, Sub};
+use std::time::Duration;
 use crate::expression::SyntaxNode;
 
 #[derive(Debug, Clone)]
@@ -129,12 +130,12 @@ fn lex(input: &str) -> Vec<Token>
 
 
 fn main() {
-    println!("Input your mathematical expression:");
-
-    let tokens = lex(" spawn a  = 5 * (1 + 1); spawn b  = 5 + a; yap(b); yap(b + 10);");
+    println!("Input your code:");
+    let mut string = std::io::stdin().lines().next().unwrap().unwrap();
+    let tokens = lex(string.as_str());
     let mut data = ProgramData::default();
     let syntax_tree: SyntaxTree = Parser::new(tokens.into_iter()).compile();
     syntax_tree.eval(&mut data);
-
+    thread::sleep(Duration::from_secs(5));
 
 }
