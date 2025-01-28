@@ -1,10 +1,14 @@
 use std::collections::HashMap;
 use std::iter::Peekable;
+use crate::Data::Data;
+use crate::Data::Data::{Boolean, Number};
 use crate::expression::{Expression, SyntaxNode};
-use crate::number::Number;
+
+
 use crate::operator::Operator;
 use crate::operator::Operator::{Divide, Multiply};
-use crate::Token;
+
+use crate::tokens::Token;
 
 /// Used to convert a collection of tokens into an Expression enum, which can also be seen as a syntax tree
 pub struct Parser<Iter : Iterator<Item=Token>>{
@@ -13,11 +17,12 @@ pub struct Parser<Iter : Iterator<Item=Token>>{
 
 #[derive(Default)]
 pub struct ProgramData{
-    pub variables: HashMap<String, Number>,
+    pub variables: HashMap<String, Data>,
 }
 
 pub struct SyntaxTree{
     nodes: Vec<SyntaxNode>,
+
 }
 impl SyntaxTree {
     pub fn eval(mut self,program_data: &mut ProgramData){
@@ -76,7 +81,7 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
                 },
                 Token::Bag => {
                     self.peekable.next();
-                    if let Some(Token::VariableName(name)) = self.peekable.next()
+                    if let Some(Token::Name(name)) = self.peekable.next()
                         && let Some(Token::Assign) = self.peekable.next()   {
                         let created = SyntaxNode::Declaration { equals_to: self.parse_expr(),name };
                         syntax_nodes.push(
@@ -107,7 +112,13 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
 
         match self.peekable.next() {
             Some(Token::Number(number)) => {
-                Expression::Number(number)
+                Expression::Data(Number(number))
+            },
+            Some(Token::Cap) => {
+                Expression::Data(Boolean(false))
+            },
+            Some(Token::Fax) => {
+                Expression::Data(Boolean(true))
             },
             Some(Token::LeftBracket) => {
                 let expr = self.parse_expr();
@@ -117,13 +128,14 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
                     panic!("Expected right bracket");
                 }
             },
-            Some(Token::VariableName(name)) => {
+            Some(Token::Name(name)) => {
                 Expression::Variable(name)
             }
             other => panic!("Expected number or left bracket, got {:?}", other)
 
         }
     }
+
     fn parse_add_sub(&mut self) -> Expression{
         let mut left = self.parse_mul();
         while let Some(Token::Operator(operator @ (Operator::Plus | Operator::Minus))) = self.peekable.peek().cloned() {
@@ -136,8 +148,44 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
         };
         return left;
     }
+    fn parse_equals_to(&mut self) -> Expression{
+        let mut left = self.parse_add_sub();
+        while let Some(Token::Operator(operator @ (Operator::Equals))) = self.peekable.peek().cloned() {
+            self.peekable.next();
+            left = Expression::BinaryExpression {
+                left: Box::new(left),
+                operator,
+                right: Box::new(self.parse_add_sub())
+            };
+        };
+        return left;
+    }
+    fn parse_and(&mut self) -> Expression{
+        let mut left = self.parse_equals_to();
+        while let Some(Token::Operator(operator @ (Operator::And))) = self.peekable.peek().cloned() {
+            self.peekable.next();
+            left = Expression::BinaryExpression {
+                left: Box::new(left),
+                operator,
+                right: Box::new(self.parse_equals_to())
+            };
+        };
+        return left;
+    }
+    fn parse_or(&mut self) -> Expression{
+        let mut left = self.parse_and();
+        while let Some(Token::Operator(operator @ (Operator::Or))) = self.peekable.peek().cloned() {
+            self.peekable.next();
+            left = Expression::BinaryExpression {
+                left: Box::new(left),
+                operator,
+                right: Box::new(self.parse_and())
+            };
+        };
+        return left;
+    }
     fn parse_expr(&mut self) -> Expression{
-        self.parse_add_sub()
+        self.parse_or()
     }
     pub fn compile(&mut self) -> SyntaxTree{
         SyntaxTree{nodes: self.start()}

@@ -1,4 +1,4 @@
-
+use crate::Data::Data;
 use crate::number::Number;
 use crate::operator::Operator;
 use crate::parser::ProgramData;
@@ -32,8 +32,12 @@ impl SyntaxNode{
 pub enum Expression {
     Variable(String),
     Bracketed(Box<Self>),
-    Number(Number),
+    Data(Data),
 
+    SingularExpression{
+        operator: Operator,
+        expression: Box<Self>
+    },
     BinaryExpression{
         left: Box<Self>,
         operator: Operator,
@@ -42,7 +46,8 @@ pub enum Expression {
 }
 impl Expression {
 
-    pub fn eval(self, program_data: &mut ProgramData) -> Number{
+
+    pub fn eval(self, program_data: &mut ProgramData) -> Data{
         match self {
             Expression::Variable(name) => {
                 program_data.variables.get(&name).expect(format!("Variable {} not found!", name).as_str()).clone()
@@ -50,12 +55,15 @@ impl Expression {
             Expression::Bracketed(input) => {
                 input.eval(program_data)
             }
-            Expression::Number(number) => {
-                return number;
+            Expression::Data(data) => {
+                return data;
             }
 
             Expression::BinaryExpression { left,operator,right } => {
                 Operator::evaluate(left.eval(program_data), operator, right.eval(program_data))
+            }
+            Expression::SingularExpression { operator, expression } => {
+                Operator::evaluate_single(operator, expression.eval(program_data))
             }
         }
     }

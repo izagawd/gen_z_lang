@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::io::stderr;
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Number{
@@ -23,7 +23,16 @@ impl Add for Number{
         }
     }
 }
+impl Neg for Number{
+    type Output = Number;
 
+    fn neg(self) -> Self::Output {
+        match self {
+            Number::Int(int) => { Number::Int(-int)}
+            Number::Float(float) => { Number::Float(-float)}
+        }
+    }
+}
 impl Debug for Number{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
