@@ -10,17 +10,23 @@ use crate::number::Number;
 use crate::number::Number::{Float, Int};
 use crate::operator::Operator;
 use crate::operator::Operator::*;
-use crate::parser::Parser;
+use crate::parser::{Parser, ProgramData, SyntaxTree};
 use std::cmp::PartialEq;
 use std::io;
 use std::ops::{Add, Div, Mul, Sub};
+use crate::expression::SyntaxNode;
 
-#[derive(Debug, Clone,Copy)]
+#[derive(Debug, Clone)]
 enum Token{
     LeftBracket,
     RightBracket,
     Number(Number),
     Operator(Operator),
+    VariableName(String),
+    Spawn,
+    SemiColon,
+    Yap,
+    Equals
 }
 /// Converts your mathematical expression into tokens
 fn lex(input: &str) -> Vec<Token>
@@ -61,6 +67,33 @@ fn lex(input: &str) -> Vec<Token>
                         tokens.push(Token::Number(Float(as_num)));
                     }
 
+                },
+                ';' => {
+                    tokens.push(Token::SemiColon);
+                }
+                '=' => {
+                    tokens.push(Token::Equals);
+                }
+                'a'..='z' | 'A'..='Z' => {
+                    let mut my_str = String::from(character);
+
+                    while let Some(next_char)
+                        = input.chars().nth(i + 1)
+                        && (('a'..='z').contains(&next_char) || ('A'..='Z').contains(&next_char) ) {
+                        character = next_char;
+                        my_str.push(character);
+                        i += 1;
+
+                    }
+                    match my_str.as_str() {
+                        "spawn" => {
+                            tokens.push(Token::Spawn);
+                        },
+                        "yap" => tokens.push(Token::Yap),
+                        other => tokens.push(Token::VariableName(my_str))
+                    }
+
+
                 }
                 '+' => {
                     tokens.push(Token::Operator(Plus));
@@ -97,9 +130,11 @@ fn lex(input: &str) -> Vec<Token>
 
 fn main() {
     println!("Input your mathematical expression:");
-    let  input_accepter  = io::stdin().lines().next().unwrap().unwrap();
-    let tokens = lex(input_accepter.as_str());
-    let expression = Parser::new(tokens.into_iter()).compile();
-    let result = expression.eval();
-    println!("Result: {result}",)
+
+    let tokens = lex(" spawn a  = 5 * (1 + 1); spawn b  = 5 + a; yap(b); yap(b + 10);");
+    let mut data = ProgramData::default();
+    let syntax_tree: SyntaxTree = Parser::new(tokens.into_iter()).compile();
+    syntax_tree.eval(&mut data);
+
+
 }
