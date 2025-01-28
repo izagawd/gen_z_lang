@@ -8,6 +8,7 @@ mod parser;
 mod Data;
 mod lexer;
 mod tokens;
+mod syntax_tree;
 
 use crate::number::Number;
 use crate::number::Number::{Float, Int};
@@ -31,8 +32,9 @@ use crate::parser::{Parser, ProgramData};
 
 fn main() {
     println!("Input your code:");
-    let mut string = "bag a = cap; yap(  ) ;";
+    let mut string = "bag a = 5; {bag a = 0 - 5; yap(a);} yap(a);";
     let tokens = lex(string);
+    println!("{tokens:?}");
     let mut parser = Parser::new(tokens.into_iter());
     let compiled =parser.compile();
     compiled.eval(&mut ProgramData::default())

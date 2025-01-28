@@ -71,6 +71,12 @@ impl Operator{
                 copy.push_str(string_two.as_str());
                 return Data::String(copy);
             },
+            (String(string), Operator::Plus, Number(number))=>{
+                return String(format!("{string}{number}"))
+            }
+            (Number(number), Operator::Plus, String(string))=>{
+                return String(format!("{number}{string}"))
+            }
             (first, Operator::Equals, second)=>{
                 return Data::Boolean(first == second)
             }

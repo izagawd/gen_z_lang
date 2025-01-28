@@ -3,6 +3,7 @@ use crate::operator::Equals::EqualsSign;
 use crate::operator::Operator::{And, Divide, Equals, Minus, Multiply, No, Or, Plus};
 
 use crate::tokens::Token;
+use crate::tokens::Token::{LeftCurlyBrace, RightCurlyBrace, StringLiteral};
 
 pub fn lex(input: &str) -> Vec<Token>
 {
@@ -20,6 +21,27 @@ pub fn lex(input: &str) -> Vec<Token>
 
                 // ignores white space
                 ' ' => {}
+                gotten @( '"' | '\'') =>{
+                    let mut text = String::new();
+                    while let Some(next_char)
+                        = input.chars().nth(i + 1)
+                    {
+
+                        i += 1;
+                        if next_char != gotten{
+                            text.push(next_char);
+                        } else{
+                            break;
+                        }
+                    }
+                    tokens.push(StringLiteral(text));
+                },
+                '{' =>{
+                    tokens.push(LeftCurlyBrace);
+                },
+                '}' => {
+                    tokens.push(RightCurlyBrace);
+                }
                 // converting numbers to tokens
                 '0'..='9' => {
                     let mut my_str = String::from(character);
@@ -105,7 +127,7 @@ pub fn lex(input: &str) -> Vec<Token>
                 ')' => {
                     tokens.push(Token::RightBracket);
                 },
-                _ => {
+                other => {
                     panic!("Unrecognized character: {}", character);
                 }
 

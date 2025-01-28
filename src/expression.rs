@@ -3,34 +3,13 @@ use crate::number::Number;
 use crate::operator::Operator;
 use crate::parser::ProgramData;
 
-pub enum SyntaxNode{
-    Declaration {name: String, equals_to: Expression},
-    Expression(Expression),
-    Yap(Expression),
-}
 
-impl SyntaxNode{
-    pub fn eval(self, program_data: &mut ProgramData){
-        match self {
-            SyntaxNode::Declaration {name,  equals_to}  =>{
-                if program_data.variables.get(&name).is_some(){
-                   panic!("Variable {} already exists!", name);
-                } else{
-                    let evaluated =equals_to.eval(program_data);
-                    program_data.variables.insert(name,evaluated);
-                }
 
-            },
-
-            SyntaxNode::Yap(expression)=> {
-                println!("{}",expression.eval(program_data))
-            }
-            _ => {}
-        }
-    }
-}
 pub enum Expression {
-    Variable(String),
+    Variable{
+        name: String,
+        depth: i32,
+    },
     Bracketed(Box<Self>),
     Data(Data),
 
@@ -49,8 +28,8 @@ impl Expression {
 
     pub fn eval(self, program_data: &mut ProgramData) -> Data{
         match self {
-            Expression::Variable(name) => {
-                program_data.variables.get(&name).expect(format!("Variable {} not found!", name).as_str()).clone()
+            Expression::Variable{ name, depth} => {
+                program_data.get_variable(name.as_str(), depth).expect(format!("Variable {} not found!", name).as_str()).clone()
             }
             Expression::Bracketed(input) => {
                 input.eval(program_data)
