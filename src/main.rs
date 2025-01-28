@@ -31,7 +31,7 @@ use crate::parser::{Parser, ProgramData};
 
 fn main() {
     println!("Input your code:");
-    let mut string = "bag a = cap; yap( no cap);";
+    let mut string = "bag a = cap; yap(  ) ;";
     let tokens = lex(string);
     let mut parser = Parser::new(tokens.into_iter());
     let compiled =parser.compile();

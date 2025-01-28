@@ -6,7 +6,7 @@ use crate::expression::{Expression, SyntaxNode};
 
 
 use crate::operator::Operator;
-use crate::operator::Operator::{Divide, Multiply};
+use crate::operator::Operator::{Divide, Multiply, No};
 
 use crate::tokens::Token;
 
@@ -111,6 +111,12 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
     fn parse_primary(&mut self) -> Expression{
 
         match self.peekable.next() {
+            Some(Token::Operator(Operator::No)) =>{
+                Expression::SingularExpression {
+                    operator: No,
+                    expression: Box::new(self.parse_expr())
+                }
+            },
             Some(Token::Number(number)) => {
                 Expression::Data(Number(number))
             },
