@@ -5,6 +5,7 @@ mod number;
 mod operator;
 mod expression;
 mod parser;
+mod Data;
 
 use crate::number::Number;
 use crate::number::Number::{Float, Int};
@@ -15,8 +16,14 @@ use std::cmp::PartialEq;
 use std::{io, thread};
 use std::ops::{Add, Div, Mul, Sub};
 use std::time::Duration;
+use crate::Equals::Is;
 use crate::expression::SyntaxNode;
+use crate::Token::Cap;
 
+#[derive(Debug, Clone)]
+enum Equals{
+    Is, EqualsSign
+}
 #[derive(Debug, Clone)]
 enum Token{
     LeftBracket,
@@ -24,10 +31,20 @@ enum Token{
     Number(Number),
     Operator(Operator),
     VariableName(String),
-    Spawn,
+    //meaning ! as in !true
+    No,
+    /// Means let. used to assign data to variables. EG bag a = 5;
+    Bag,
     SemiColon,
+    /// means true
     Yap,
-    Equals
+    /// means false
+    Cap,
+    Fax,
+    Assign,
+    And,
+    Or,
+    Equals(Equals)
 }
 /// Converts your mathematical expression into tokens
 fn lex(input: &str) -> Vec<Token>
@@ -40,7 +57,10 @@ fn lex(input: &str) -> Vec<Token>
 
         if let Some(mut character) = input.chars().nth(i){
 
+
             match character {
+
+
                 // ignores white space
                 ' ' => {}
                 // converting numbers to tokens
@@ -48,18 +68,21 @@ fn lex(input: &str) -> Vec<Token>
                     let mut my_str = String::from(character);
 
                     let mut is_float = false;
-                    while let Some(next_char)
-                        = input.chars().nth(i + 1)
-                        && (('0'..='9').contains(&next_char)
-                        || (next_char == '.' && !is_float)) {
-                        if next_char == '.'{
-                            is_float = true;
+                    let mut look_for_characters = |i: &mut usize|{
+                        while let Some(next_char)
+                            = input.chars().nth(*i + 1)
+                            && (('0'..='9').contains(&next_char)) {
+                            character = next_char;
+                            my_str.push(character);
+                            *i += 1;
                         }
-                        character = next_char;
-                        my_str.push(character);
+                    };
+                    look_for_characters(&mut i);
+                    if let Some('.')  = input.chars().nth(i + 1) {
                         i += 1;
-
+                        is_float = true;
                     }
+                    look_for_characters(&mut i);
                     if !is_float{
                         let as_num : i32 = my_str.parse().expect(format!("Unable to parse {my_str} as number").as_str());
                         tokens.push(Token::Number(Int(as_num)));
@@ -73,24 +96,35 @@ fn lex(input: &str) -> Vec<Token>
                     tokens.push(Token::SemiColon);
                 }
                 '=' => {
-                    tokens.push(Token::Equals);
+                    if let Some('=') = input.chars().nth(i + 1){
+                        tokens.push(Token::Equals(Equals::EqualsSign));
+                        i += 1;
+                    } else{
+                        tokens.push(Token::Assign);
+                    }
                 }
                 'a'..='z' | 'A'..='Z' => {
                     let mut my_str = String::from(character);
-
+                    let  possible_other_characters =('a'..='z').chain('A'..='Z').chain('0'..'9').collect::<Vec<_>>();
                     while let Some(next_char)
                         = input.chars().nth(i + 1)
-                        && (('a'..='z').contains(&next_char) || ('A'..='Z').contains(&next_char) ) {
+                        && possible_other_characters.contains(&next_char) {
                         character = next_char;
                         my_str.push(character);
                         i += 1;
 
                     }
                     match my_str.as_str() {
-                        "spawn" => {
-                            tokens.push(Token::Spawn);
+                        "bag" => {
+                            tokens.push(Token::Bag);
                         },
                         "yap" => tokens.push(Token::Yap),
+                        "is" => tokens.push(Token::Equals(Is)),
+                        "no" => tokens.push(Token::No),
+                        "cap" => tokens.push(Token::Cap),
+                        "fax" => tokens.push(Token::Fax),
+                        "and" => tokens.push(Token::And),
+                        "or" => tokens.push(Token::Or),
                         other => tokens.push(Token::VariableName(my_str))
                     }
 
@@ -131,11 +165,10 @@ fn lex(input: &str) -> Vec<Token>
 
 fn main() {
     println!("Input your code:");
-    let mut string = std::io::stdin().lines().next().unwrap().unwrap();
-    let tokens = lex(string.as_str());
-    let mut data = ProgramData::default();
-    let syntax_tree: SyntaxTree = Parser::new(tokens.into_iter()).compile();
-    syntax_tree.eval(&mut data);
-    thread::sleep(Duration::from_secs(5));
+    let mut string = "bag a = no cap bruh";
+    let tokens = lex(string);
+    println!("{:?}",tokens);
+
+
 
 }

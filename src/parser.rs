@@ -55,7 +55,7 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
 
     fn parse_let_and_yap(&mut self) -> Vec<SyntaxNode>{
         let mut syntax_nodes = Vec::new();
-        while let Some(spawn_or_print @ (Token::Spawn | Token::Yap)) = self.peekable.peek().cloned() {
+        while let Some(spawn_or_print @ (Token::Bag | Token::Yap)) = self.peekable.peek().cloned() {
             match spawn_or_print {
                 Token::Yap => {
                     while let Some(Token::Yap) = self.peekable.peek().cloned() {
@@ -74,10 +74,10 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
                         }
                     };
                 },
-                Token::Spawn => {
+                Token::Bag => {
                     self.peekable.next();
                     if let Some(Token::VariableName(name)) = self.peekable.next()
-                        && let Some(Token::Equals) = self.peekable.next()   {
+                        && let Some(Token::Assign) = self.peekable.next()   {
                         let created = SyntaxNode::Declaration { equals_to: self.parse_expr(),name };
                         syntax_nodes.push(
                             self.parse_finish_line(created)
