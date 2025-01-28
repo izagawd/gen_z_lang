@@ -15,6 +15,8 @@ pub enum Token{
     //meaning ! as in !true
     Cap,
     Fax,
+    If,
+    Else,
     /// Means let. used to assign data to variables. EG bag a = 5;
     Bag,
     SemiColon,

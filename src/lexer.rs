@@ -98,6 +98,8 @@ pub fn lex(input: &str) -> Vec<Token>
                             tokens.push(Token::Bag);
                         },
                         "yap" => tokens.push(Token::Yap),
+                        "if" => tokens.push(Token::If),
+                        "else" => tokens.push(Token::Else),
                         "is" => tokens.push(Token::Operator(Equals)),
                         "no" => tokens.push(Token::Operator(No)),
                         "cap" => tokens.push(Token::Cap),

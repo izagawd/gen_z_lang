@@ -105,34 +105,29 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
     }
 
 
-    fn parse_block(&mut self) -> SyntaxNode{
-
-        if let Some(Token::LeftCurlyBrace) = self.peekable.peek().cloned() {
-            self.peekable.next();
-            self.depth += 1;
-            let parsed_instructions = self.parse_instruction();
-            let the_node =
-                SyntaxNode::new(SyntaxNodeVariant::Block {
-                    instructions: parsed_instructions,
-                } ,self.depth);
-            self.depth -= 1;
-            if let Some(Token::RightCurlyBrace) = self.peekable.next() {
-
-            } else {
-                panic!();
-            }
-            return the_node;
-        }
-        panic!("Missing block")
-    }
 
     fn parse_instruction(&mut self) -> Vec<SyntaxNode>{
         let mut syntax_nodes = Vec::new();
         while let Some(spawn_or_print @ (Token::Bag | Token::Yap |Token::LeftCurlyBrace)) = self.peekable.peek().cloned() {
             match spawn_or_print {
                 Token::LeftCurlyBrace => {
-                    let created_one = self.parse_block();
-                    syntax_nodes.push(created_one);
+
+                    self.peekable.next();
+                    self.depth += 1;
+                    let parsed_instructions = self.parse_instruction();
+                    let the_node =
+                        SyntaxNode::new(SyntaxNodeVariant::Block {
+                            instructions: parsed_instructions,
+                        } ,self.depth);
+                    self.depth -= 1;
+                    if let Some(Token::RightCurlyBrace) = self.peekable.next() {
+
+                    } else {
+                        panic!();
+                    }
+                   syntax_nodes.push(the_node);
+
+
 
                 }
                 Token::Yap => {

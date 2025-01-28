@@ -31,6 +31,7 @@ use crate::parser::{Parser, ProgramData};
 
 
 fn main() {
+
     println!("Input your code:");
     let mut string = "bag a = 5; {bag a = 0 - 5; yap(a);} yap(a);";
     let tokens = lex(string);
