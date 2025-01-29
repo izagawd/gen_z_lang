@@ -23,6 +23,7 @@ pub enum SyntaxNodeVariant{
 
         instructions: Vec<SyntaxNode>,
     },
+    Reassignment {name: String, equals_to: Expression},
     Declaration {name: String, equals_to: Expression},
     Expression(Expression),
     Yap(Expression),
@@ -70,6 +71,16 @@ impl SyntaxNode{
 
                 } else{
                     panic!("If condition not a boolean!")
+                }
+            }
+            SyntaxNodeVariant::Reassignment { equals_to, name} => {
+                let gotten_with_depth = program_data.get_variable_with_depth(name.as_str(), self.depth);
+                if  let Some(data) =gotten_with_depth{
+                    let evaled =equals_to.eval(program_data);
+                    program_data.set_variable(name.as_str(),data.1,evaled );
+
+                } else{
+                    panic!("Variable {} has not been declared!", name);
                 }
             }
             _ => {}

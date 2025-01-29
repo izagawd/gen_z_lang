@@ -58,8 +58,9 @@ impl ProgramData{
             depth_data = self.depth_datas.get_mut(&depth).unwrap();
         }
 
-       if  depth_data.variables.insert(input.to_string(),data).is_some() {
-           println!("Failed to insert data. variable {input} in depth {depth} already exists");
+       if  depth_data.variables.insert(input.to_string(),data.clone()).is_some() {
+           depth_data.variables.remove(&input.to_string());
+           depth_data.variables.insert(input.to_string(),data);
        }
 
 
@@ -109,8 +110,21 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
     fn parse_instruction(&mut self) -> Vec<SyntaxNode>{
         let mut syntax_nodes = Vec::new();
         while let Some(spawn_or_print @
-                       (Token::Bag | Token::Yap |Token::LeftCurlyBrace | Token::If)) = self.peekable.peek().cloned() {
+                       (Token::Bag | Token::Yap |Token::LeftCurlyBrace | Token::If | Token::Name(_))) = self.peekable.peek().cloned() {
             match spawn_or_print {
+                Token::Name(name) =>{
+                    self.peekable.next();
+                    if let Some(Token::Assign) = self.peekable.next()   {
+                        let created = SyntaxNode::new(
+                            SyntaxNodeVariant::Reassignment { equals_to: self.parse_expr(),name },
+                            self.depth);
+                        syntax_nodes.push(
+                            self.parse_finish_line(created)
+                        );
+                    } else{
+                        panic!("Expected  =");
+                    }
+                }
                 Token::If => {
                     self.peekable.next();
                     let expression = self.parse_expr();
@@ -203,13 +217,19 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
     fn parse_primary(&mut self) -> Expression{
 
         match self.peekable.next() {
+            Some(Token::Operator(Operator::Minus)) => {
+                Expression::SingularExpression {
+                    operator: Operator::Minus,
+                    expression: Box::new(self.parse_primary())
+                }
+            }
             Some(Token::StringLiteral(string)) => {
                 Expression::Data(Data::String(string))
             }
             Some(Token::Operator(Operator::No)) =>{
                 Expression::SingularExpression {
                     operator: No,
-                    expression: Box::new(self.parse_expr())
+                    expression: Box::new(self.parse_primary())
                 }
             },
             Some(Token::Number(number)) => {
@@ -309,6 +329,10 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
 
     }
     fn start(&mut self) -> Vec<SyntaxNode>{
-        self.parse_instruction()
+        let parsed=self.parse_instruction();
+        if parsed.len() == 0 && self.peekable.peek().is_some(){
+            panic!("Unexpected token: {}",self.peekable.next().unwrap());
+        }
+        return parsed;
     }
 }
