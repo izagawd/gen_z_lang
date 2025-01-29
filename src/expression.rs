@@ -4,7 +4,7 @@ use crate::operator::Operator;
 use crate::parser::ProgramData;
 
 
-
+#[derive(Debug)]
 pub enum Expression {
     Variable{
         name: String,

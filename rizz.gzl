@@ -1,0 +1,17 @@
+bag a = 5;
+a = a + 5;
+yap(" yo");
+
+yap(" yo");
+
+if a == -11.1 {
+    yap("bruh");
+} else{
+    yap("nigga");
+}
+{
+{
+yap("yo");
+}
+
+}

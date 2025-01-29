@@ -1,3 +1,4 @@
+use std::fmt::{Debug, Formatter};
 use crate::Data::Data;
 use crate::expression::Expression;
 use crate::parser::ProgramData;
@@ -6,18 +7,23 @@ pub struct SyntaxNode{
     syntax_node_variant: SyntaxNodeVariant,
     depth: i32
 }
-
+impl Debug for SyntaxNode{
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.syntax_node_variant.fmt(f)
+    }
+}
 impl SyntaxNode{
     pub fn new(syntax_node_variant: SyntaxNodeVariant, depth: i32) -> SyntaxNode{
         SyntaxNode{syntax_node_variant, depth}
     }
 }
 
+#[derive(Debug)]
 pub enum SyntaxNodeVariant{
     If{
         condition: Expression,
-        execution: Vec<SyntaxNode>,
-        else_execution: Option<Vec<SyntaxNode>>,
+        execution: Box<SyntaxNode>,
+        else_execution: Option<Box<SyntaxNode>>,
     },
     Block{
 
@@ -29,7 +35,7 @@ pub enum SyntaxNodeVariant{
     Yap(Expression),
     While{
         condition: Expression,
-        execution: Vec<SyntaxNode>,
+        execution: Box<SyntaxNode>,
     }
 }
 
@@ -60,15 +66,15 @@ impl SyntaxNode{
             SyntaxNodeVariant::If{condition, execution, else_execution} => {
                 if let Data::Boolean(condition_happened)  = condition.eval(program_data) {
                     if condition_happened{
-                        for i in execution{
-                            i.eval(program_data);
-                        }
+
+                            execution.eval(program_data);
+
 
                     } else{
                         if let Some(else_execution) = else_execution{
-                            for i in else_execution{
-                                i.eval(program_data);
-                            }
+
+                                else_execution.eval(program_data);
+
 
                         }
                     }
@@ -80,9 +86,7 @@ impl SyntaxNode{
             SyntaxNodeVariant::While { condition, execution } => {
                 while let Data::Boolean(condition_happened)  = condition.eval(program_data) {
                     if condition_happened{
-                        for i in execution.iter(){
-                            i.eval(program_data);
-                        }
+                        execution.eval(program_data);
                     }
                 }
             }

@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::{Debug, Formatter};
 use std::iter::Peekable;
 use crate::Data::Data;
 use crate::Data::Data::{Boolean, Number};
@@ -71,6 +72,11 @@ pub struct SyntaxTree{
     nodes: Vec<SyntaxNode>,
 
 }
+impl Debug for SyntaxTree{
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.nodes.fmt(f)
+    }
+}
 impl SyntaxTree {
     pub fn eval(mut self,program_data: &mut ProgramData){
         for i in self.nodes.into_iter(){
@@ -107,9 +113,9 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
 
 
 
-    fn parse_instruction(&mut self) -> Vec<SyntaxNode>{
-        let mut syntax_nodes = Vec::new();
-        while let Some(spawn_or_print @
+    fn parse_instruction(&mut self) -> SyntaxNode {
+
+        if let Some(spawn_or_print @
                        (Token::Bag | Token::Yap |Token::LeftCurlyBrace |
                        Token::If | Token::Name(_) | Token::While)) = self.peekable.peek().cloned() {
             match spawn_or_print {
@@ -119,9 +125,9 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
                     let while_code = self.parse_instruction();
                     let node = SyntaxNode::new(SyntaxNodeVariant::While {
                         condition: expression,
-                        execution: while_code,
+                        execution: Box::new(while_code),
                     },self.depth);
-                    syntax_nodes.push(node);
+                    return node;
                 }
                 Token::Name(name) =>{
                     self.peekable.next();
@@ -129,9 +135,8 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
                         let created = SyntaxNode::new(
                             SyntaxNodeVariant::Reassignment { equals_to: self.parse_expr(),name },
                             self.depth);
-                        syntax_nodes.push(
-                            self.parse_finish_line(created)
-                        );
+
+                         return   self.parse_finish_line(created);
                     } else{
                         panic!("Expected  =");
                     }
@@ -148,28 +153,35 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
                     }
                     let the_node = SyntaxNode::new(SyntaxNodeVariant::If {
                         condition: expression,
-                        else_execution: else_cond,
-                        execution: if_code,
+                        else_execution: else_cond.map(|x| Box::new(x)),
+                        execution: Box::new(if_code),
 
                     },self.depth);
-                    syntax_nodes.push(the_node);
+                    return the_node;
                 }
                 Token::LeftCurlyBrace => {
 
                     self.peekable.next();
                     self.depth += 1;
-                    let parsed_instructions = self.parse_instruction();
+                    let mut instructions = Vec::new();
+                    loop {
+                        match  self.peekable.peek().cloned(){
+                            Some(Token::RightCurlyBrace) => {
+                                self.peekable.next();
+                                break;
+                            }
+                            _ => {
+                                instructions.push(self.parse_instruction());
+                            }
+                        }
+                    }
+
                     let the_node =
                         SyntaxNode::new(SyntaxNodeVariant::Block {
-                            instructions: parsed_instructions,
+                            instructions: instructions,
                         } ,self.depth);
                     self.depth -= 1;
-                    if let Some(Token::RightCurlyBrace) = self.peekable.next() {
-
-                    } else {
-                        panic!();
-                    }
-                   syntax_nodes.push(the_node);
+                   return the_node;
 
 
 
@@ -182,9 +194,8 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
                                 SyntaxNodeVariant::Yap(self.parse_expr()),
                             self.depth); ;
                             if let Some(Token::RightBracket) = self.peekable.next()  {
-                                syntax_nodes.push(
-                                    self.parse_finish_line(created)
-                                );
+                                return
+                                    self.parse_finish_line(created);
                             } else{
                                 panic!("Right bracket missing on yap");
                             }
@@ -200,9 +211,8 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
                         let created = SyntaxNode::new(
                              SyntaxNodeVariant::Declaration { equals_to: self.parse_expr(),name },
                             self.depth);
-                        syntax_nodes.push(
-                            self.parse_finish_line(created)
-                        );
+                        return
+                            self.parse_finish_line(created);
                     } else{
                         panic!("Expected variable-name =");
                     }
@@ -210,8 +220,7 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
                 _ => {panic!()}
             }
         };
-
-        return syntax_nodes;
+        panic!("Unexpected token: {:?}", self.peekable.next());
     }
     fn parse_div(&mut self) -> Expression{
         let mut left = self.parse_primary();
@@ -340,10 +349,12 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
 
     }
     fn start(&mut self) -> Vec<SyntaxNode>{
-        let parsed=self.parse_instruction();
-        if parsed.len() == 0 && self.peekable.peek().is_some(){
-            panic!("Unexpected token: {}",self.peekable.next().unwrap());
+        let mut za_vec = Vec::new();
+        while let Some(_) = self.peekable.peek(){
+            za_vec.push(self.parse_instruction());
         }
-        return parsed;
+
+
+        return za_vec;
     }
 }

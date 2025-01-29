@@ -44,6 +44,7 @@ fn main() {
                 let panic = std::panic::catch_unwind(|| {
                     println!("NOTE: ONCE UR DONE CODING IN THE FILE \"{CODE_FILE_NAME}\", PRESS ENTER HERE TO RUN THE CODE");
                     let tokens = lex(code.as_str());
+
                     let mut parser = Parser::new(tokens.into_iter());
                     let compiled = parser.compile();
                     compiled.eval(&mut ProgramData::default())
