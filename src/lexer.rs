@@ -108,6 +108,7 @@ pub fn lex(input: &str) -> Vec<Token>
                         "no" => tokens.push(Token::Operator(No)),
                         "cap" => tokens.push(Token::Cap),
                         "fax" => tokens.push(Token::Fax),
+                        "while" => tokens.push(Token::While),
                         "and" => tokens.push(Token::Operator(And)),
                         "or" => tokens.push(Token::Operator(Or)),
                         other => tokens.push(Token::Name(my_str))
