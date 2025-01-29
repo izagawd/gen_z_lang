@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
 use std::io::stderr;
 use std::ops::{Add, Div, Mul, Neg, Sub};
@@ -20,6 +21,16 @@ impl Add for Number{
             (Number::Int(a), Number::Float(b)) => Number::Float(a as f32 + b),
             (Number::Float(a), Number::Float(b)) => Number::Float(a + b),
             (Number::Float(a), Number::Int(b)) => Number::Float(a + b as f32),
+        }
+    }
+}
+impl PartialOrd for Number{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match (self, other) {
+            (Number::Int(a), Number::Int(b)) => a.partial_cmp(b),
+            (Number::Int(a), Number::Float(b)) => (*a as f32).partial_cmp(b),
+            (Number::Float(a), Number::Float(b)) => a.partial_cmp(b),
+            (Number::Float(a), Number::Int(b)) => a.partial_cmp(&(*b as f32))
         }
     }
 }

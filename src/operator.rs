@@ -16,7 +16,8 @@ pub enum Operator{
     Divide,
     Equals,
     No,
-
+    LessThan,
+    GreaterThan,
     And,
     Or,
 
@@ -77,9 +78,16 @@ impl Operator{
             (Number(number), Operator::Plus, String(string))=>{
                 return String(format!("{number}{string}"))
             }
+            (Number(number_one), Operator::GreaterThan, Number(number_two))=>{
+                return Data::Boolean(number_one > number_two)
+            }
+            (Number(number_one), Operator::LessThan, Number(number_two))=>{
+                return Data::Boolean(number_one < number_two)
+            }
             (first, Operator::Equals, second)=>{
                 return Data::Boolean(first == second)
-            }
+            },
+
             (first,operator,second) => panic!("Cannot evaluate {} and {} with {}!",first.to_string(),second.to_string(),
             operator.to_string(),)
         }

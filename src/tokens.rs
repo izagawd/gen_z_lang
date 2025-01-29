@@ -17,6 +17,7 @@ pub enum Token{
     Fax,
     If,
     Else,
+    While,
     /// Means let. used to assign data to variables. EG bag a = 5;
     Bag,
     SemiColon,

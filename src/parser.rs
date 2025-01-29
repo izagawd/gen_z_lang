@@ -252,14 +252,26 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
         };
         return left;
     }
-    fn parse_equals_to(&mut self) -> Expression{
+    fn parse_less_than_greater_than(&mut self) -> Expression{
         let mut left = self.parse_add_sub();
-        while let Some(Token::Operator(operator @ (Operator::Equals))) = self.peekable.peek().cloned() {
+        while let Some(Token::Operator(operator @ (Operator::LessThan | Operator::GreaterThan))) = self.peekable.peek().cloned() {
             self.peekable.next();
             left = Expression::BinaryExpression {
                 left: Box::new(left),
                 operator,
                 right: Box::new(self.parse_add_sub())
+            };
+        };
+        return left;
+    }
+    fn parse_equals_to(&mut self) -> Expression{
+        let mut left = self.parse_less_than_greater_than();
+        while let Some(Token::Operator(operator @ (Operator::Equals))) = self.peekable.peek().cloned() {
+            self.peekable.next();
+            left = Expression::BinaryExpression {
+                left: Box::new(left),
+                operator,
+                right: Box::new(self.parse_less_than_greater_than())
             };
         };
         return left;
