@@ -1,0 +1,2 @@
+bag foo = 4;
+yap(foo + (5 * 5));

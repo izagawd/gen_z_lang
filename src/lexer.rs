@@ -88,7 +88,7 @@ pub fn lex(input: &str) -> Vec<Token>
                 }
                 'a'..='z' | 'A'..='Z' => {
                     let mut my_str = String::from(character);
-                    let  possible_other_characters =('a'..='z').chain('A'..='Z').chain('0'..'9').collect::<Vec<_>>();
+                    let  possible_other_characters =('a'..='z').chain('A'..='Z').chain('0'..'9').chain(['-','_']).collect::<Vec<_>>();
                     while let Some(next_char)
                         = input.chars().nth(i + 1)
                         && possible_other_characters.contains(&next_char) {
@@ -122,6 +122,9 @@ pub fn lex(input: &str) -> Vec<Token>
                 '-' => {
                     tokens.push(Token::Operator(Minus));
                 },
+                '\n' | '\r' => {
+
+                }
                 '*' => {
                     tokens.push(Token::Operator(Multiply));
                 },

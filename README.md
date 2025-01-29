@@ -1,24 +1,41 @@
 <h2>Summary</h2>
 A simple interpreted programming language made with rust.
 
-variable declaration:
+<h2>VARIABLE DECLARATION</h2>
 bag foo = 4;
 
-once a variable is declared it cannot change.
-
-printing:
-
+<h2>PRINTING</h1>
+```
+bag foo = 4;
 yap(foo + (5 * 5));
-
+```
 NOTE: a semicolon represents end of a line
-<H2>EXAMPLE USAGE</h2>
+<H2>IF/ELSE</h2>
+```
+bag a = -5;
+a = a + 10;
 
-Input:
+if a == 5 {
+  yap("YAY");
+}
 
-bag a = (5 * 5) +  (5* 5); yap(a);
-
+else {
+  yap("aww");
+}
+```
 expected output:
+YAY
+while loops are in this language as well. So as string concatenation
+In this language, true is fax, and false is cap. "!" (or not) is no.
 
-50
+So if you want to say !false, you say, no cap, which is the same as true, which is false
+EG:
+```
+yap(no cap);
+```
+Expected output:
 
-NOTE: Since input is from a console, you cant make new lines. so use ";" to indicate a new line. press enter when done
+fax.
+
+There's also: while loops
+

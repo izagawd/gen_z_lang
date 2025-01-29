@@ -26,23 +26,23 @@ pub enum Expression {
 impl Expression {
 
 
-    pub fn eval(self, program_data: &mut ProgramData) -> Data{
+    pub fn eval(&self, program_data: &mut ProgramData) -> Data{
         match self {
             Expression::Variable{ name, depth} => {
-                program_data.get_variable(name.as_str(), depth).expect(format!("Variable {} not found!", name).as_str()).clone()
+                program_data.get_variable(name.as_str(), *depth).expect(format!("Variable {} not found!", name).as_str()).clone()
             }
             Expression::Bracketed(input) => {
                 input.eval(program_data)
             }
             Expression::Data(data) => {
-                return data;
+                return data.clone();
             }
 
             Expression::BinaryExpression { left,operator,right } => {
-                Operator::evaluate(left.eval(program_data), operator, right.eval(program_data))
+                Operator::evaluate(left.eval(program_data), *operator, right.eval(program_data))
             }
             Expression::SingularExpression { operator, expression } => {
-                Operator::evaluate_single(operator, expression.eval(program_data))
+                Operator::evaluate_single(*operator, expression.eval(program_data))
             }
         }
     }

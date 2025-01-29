@@ -27,11 +27,15 @@ pub enum SyntaxNodeVariant{
     Declaration {name: String, equals_to: Expression},
     Expression(Expression),
     Yap(Expression),
+    While{
+        condition: Expression,
+        execution: Vec<SyntaxNode>,
+    }
 }
 
 impl SyntaxNode{
-    pub fn eval(self, program_data: &mut ProgramData){
-        match self.syntax_node_variant {
+    pub fn eval(&self, program_data: &mut ProgramData){
+        match &self.syntax_node_variant {
             SyntaxNodeVariant::Declaration {name,  equals_to}  =>{
                 let gotten_with_depth = program_data.get_variable_with_depth(name.as_str(), self.depth);
 
@@ -71,6 +75,15 @@ impl SyntaxNode{
 
                 } else{
                     panic!("If condition not a boolean!")
+                }
+            }
+            SyntaxNodeVariant::While { condition, execution } => {
+                while let Data::Boolean(condition_happened)  = condition.eval(program_data) {
+                    if condition_happened{
+                        for i in execution.iter(){
+                            i.eval(program_data);
+                        }
+                    }
                 }
             }
             SyntaxNodeVariant::Reassignment { equals_to, name} => {
