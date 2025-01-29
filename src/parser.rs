@@ -297,7 +297,7 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
     }
     fn parse_equals_to(&mut self) -> Expression{
         let mut left = self.parse_less_than_greater_than();
-        while let Some(Token::Operator(operator @ (Operator::Equals))) = self.peekable.peek().cloned() {
+        while let Some(Token::Operator(operator @ (Operator::Equals | Operator::NotEquals))) = self.peekable.peek().cloned() {
             self.peekable.next();
             left = Expression::BinaryExpression {
                 left: Box::new(left),

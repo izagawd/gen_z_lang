@@ -1,6 +1,6 @@
 use crate::number::Number::{Float, Int};
 use crate::operator::Equals::EqualsSign;
-use crate::operator::Operator::{And, Divide, Equals, GreaterThan, LessThan, Minus, Multiply, No, Or, Plus};
+use crate::operator::Operator::{And, Divide, Equals, GreaterThan, LessThan, Minus, Multiply, No, NotEquals, Or, Plus};
 
 use crate::tokens::Token;
 use crate::tokens::Token::{LeftCurlyBrace, RightCurlyBrace, StringLiteral};
@@ -78,6 +78,12 @@ pub fn lex(input: &str) -> Vec<Token>
                     tokens.push(Token::Operator(LessThan));
                 }
                 '>' => tokens.push(Token::Operator(GreaterThan)),
+                '!' => {
+                    if let Some('=') = input.chars().nth(i + 1){
+                        tokens.push(Token::Operator(NotEquals));
+                        i += 1;
+                    }
+                }
                 '=' => {
                     if let Some('=') = input.chars().nth(i + 1){
                         tokens.push(Token::Operator(Equals));

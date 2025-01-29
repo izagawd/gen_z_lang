@@ -42,7 +42,7 @@ fn main() {
             let mut code = String::new();
             if let Ok(_) = file.read_to_string(&mut code) {
                 let panic = std::panic::catch_unwind(|| {
-                    println!("NOTE: ONCE UR DONE CODING IN THE FILE, PRESS ENTER HERE TO RUN THE CODE");
+                    println!("NOTE: ONCE UR DONE CODING IN THE FILE \"{CODE_FILE_NAME}\", PRESS ENTER HERE TO RUN THE CODE");
                     let tokens = lex(code.as_str());
                     let mut parser = Parser::new(tokens.into_iter());
                     let compiled = parser.compile();

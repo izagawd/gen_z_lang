@@ -15,6 +15,7 @@ pub enum Operator{
     Multiply,
     Divide,
     Equals,
+    NotEquals,
     No,
     LessThan,
     GreaterThan,
@@ -49,6 +50,13 @@ impl Operator{
     pub fn evaluate(first: Data, operator: Operator, second: Data)-> Data{
         return match ( first,operator, second) {
 
+            (first, Operator::NotEquals, second) =>{
+                match Operator::evaluate(first, Operator::Equals, second) {
+                    Boolean(false) => Data::Boolean(true),
+                    Boolean(true) => Data::Boolean(false),
+                    _ => panic!("This usually is unreachable")
+                }
+            }
             (Number(number_one), Operator::Plus, Number(number_two)) =>{
                 return Data::Number(number_one + number_two);
             },
