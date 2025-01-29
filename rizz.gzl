@@ -1,4 +1,0 @@
-bag a = 5;
-yap(a == 5 and 5 != 4);
-yap(a > 3 or a > 10);
-yap(no no no cap);
