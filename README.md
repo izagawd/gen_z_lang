@@ -2,6 +2,7 @@
 A simple interpreted programming language made with rust.
 
 <h2>VARIABLE DECLARATION</h2>
+
 ```
 bag foo = 4;
 ```
@@ -22,12 +23,14 @@ bag foo = 5;
 is INVALID
 
 <h2>PRINTING</h1>
+
 ```
 bag foo = 4;
 yap(foo + (5 * 5));
 ```
 NOTE: a semicolon represents end of a line
 <H2>IF/ELSE</h2>
+
 ```
 bag a = -5;
 a = a + 10;
@@ -59,6 +62,7 @@ fax.
 There's also: while loops
 
 <h2>OTHER EXAMPLES</h2>
+
 ```
 bag a = 5;
 yap(a == 5 and 5 != 4);
