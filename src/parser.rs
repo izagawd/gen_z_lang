@@ -108,8 +108,27 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
 
     fn parse_instruction(&mut self) -> Vec<SyntaxNode>{
         let mut syntax_nodes = Vec::new();
-        while let Some(spawn_or_print @ (Token::Bag | Token::Yap |Token::LeftCurlyBrace)) = self.peekable.peek().cloned() {
+        while let Some(spawn_or_print @
+                       (Token::Bag | Token::Yap |Token::LeftCurlyBrace | Token::If)) = self.peekable.peek().cloned() {
             match spawn_or_print {
+                Token::If => {
+                    self.peekable.next();
+                    let expression = self.parse_expr();
+                    let mut else_cond = None;
+                    let if_code = self.parse_instruction();
+                    if let Some(Token::Else) = self.peekable.peek().cloned(){
+                        self.peekable.next();
+                        let parsed_instruction = self.parse_instruction();
+                        else_cond = Some(parsed_instruction);
+                    }
+                    let the_node = SyntaxNode::new(SyntaxNodeVariant::If {
+                        condition: expression,
+                        else_execution: else_cond,
+                        execution: if_code,
+
+                    },self.depth);
+                    syntax_nodes.push(the_node);
+                }
                 Token::LeftCurlyBrace => {
 
                     self.peekable.next();

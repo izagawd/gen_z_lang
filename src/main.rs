@@ -33,7 +33,7 @@ use crate::parser::{Parser, ProgramData};
 fn main() {
 
     println!("Input your code:");
-    let mut string = "bag a = 5; {bag a = 0 - 5; yap(a);} yap(a);";
+    let mut string = "if 5 == 4 yap('yay'); else if 5 == 4 yap('aww'); else yap('BITCH');";
     let tokens = lex(string);
     println!("{tokens:?}");
     let mut parser = Parser::new(tokens.into_iter());

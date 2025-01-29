@@ -1,3 +1,4 @@
+use crate::Data::Data;
 use crate::expression::Expression;
 use crate::parser::ProgramData;
 
@@ -13,6 +14,11 @@ impl SyntaxNode{
 }
 
 pub enum SyntaxNodeVariant{
+    If{
+        condition: Expression,
+        execution: Vec<SyntaxNode>,
+        else_execution: Option<Vec<SyntaxNode>>,
+    },
     Block{
 
         instructions: Vec<SyntaxNode>,
@@ -45,6 +51,26 @@ impl SyntaxNode{
                     i.eval(program_data);
                 }
                 program_data.erase_depth(self.depth);
+            }
+            SyntaxNodeVariant::If{condition, execution, else_execution} => {
+                if let Data::Boolean(condition_happened)  = condition.eval(program_data) {
+                    if condition_happened{
+                        for i in execution{
+                            i.eval(program_data);
+                        }
+
+                    } else{
+                        if let Some(else_execution) = else_execution{
+                            for i in else_execution{
+                                i.eval(program_data);
+                            }
+
+                        }
+                    }
+
+                } else{
+                    panic!("If condition not a boolean!")
+                }
             }
             _ => {}
         }
