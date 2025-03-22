@@ -115,9 +115,7 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
 
     fn parse_instruction(&mut self) -> SyntaxNode {
 
-        if let Some(spawn_or_print @
-                       (Token::Bag | Token::Yap |Token::LeftCurlyBrace |
-                       Token::If | Token::Name(_) | Token::While)) = self.peekable.peek().cloned() {
+        if let Some(spawn_or_print) = self.peekable.peek().cloned() {
             match spawn_or_print {
                 Token::While => {
                     self.peekable.next();
@@ -217,7 +215,7 @@ impl<Iter : Iterator<Item=Token>> Parser<Iter>{
                         panic!("Expected variable-name =");
                     }
                 }
-                _ => {panic!()}
+                _ => {panic!("Invalid token.")}
             }
         };
         panic!("Unexpected token: {:?}", self.peekable.next());
